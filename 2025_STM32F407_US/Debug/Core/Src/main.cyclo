@@ -6,4 +6,4 @@
 ../Core/Src/main.c:318:13:MX_USART2_UART_Init	2
 ../Core/Src/main.c:351:13:MX_GPIO_Init	1
 ../Core/Src/main.c:380:6:Trigger_Ultrasonic	1
-../Core/Src/main.c:391:6:Error_Handler	1
+../Core/Src/main.c:394:6:Error_Handler	1

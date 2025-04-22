@@ -103,7 +103,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     PC6     ------> TIM8_CH1
     PC7     ------> TIM8_CH2
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;
+    GPIO_InitStruct.Pin = ECHO_Pin|GPIO_PIN_7;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -121,6 +121,9 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     /* USER CODE END TIM11_MspInit 0 */
     /* Peripheral clock enable */
     __HAL_RCC_TIM11_CLK_ENABLE();
+    /* TIM11 interrupt Init */
+    HAL_NVIC_SetPriority(TIM1_TRG_COM_TIM11_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM1_TRG_COM_TIM11_IRQn);
     /* USER CODE BEGIN TIM11_MspInit 1 */
 
     /* USER CODE END TIM11_MspInit 1 */
@@ -141,12 +144,12 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
     /**TIM11 GPIO Configuration
     PB9     ------> TIM11_CH1
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_9;
+    GPIO_InitStruct.Pin = TRIG_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF3_TIM11;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(TRIG_GPIO_Port, &GPIO_InitStruct);
 
     /* USER CODE BEGIN TIM11_MspPostInit 1 */
 
@@ -174,7 +177,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     PC6     ------> TIM8_CH1
     PC7     ------> TIM8_CH2
     */
-    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_6|GPIO_PIN_7);
+    HAL_GPIO_DeInit(GPIOC, ECHO_Pin|GPIO_PIN_7);
 
     /* USER CODE BEGIN TIM8_MspDeInit 1 */
 
@@ -187,6 +190,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     /* USER CODE END TIM11_MspDeInit 0 */
     /* Peripheral clock disable */
     __HAL_RCC_TIM11_CLK_DISABLE();
+
+    /* TIM11 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM1_TRG_COM_TIM11_IRQn);
     /* USER CODE BEGIN TIM11_MspDeInit 1 */
 
     /* USER CODE END TIM11_MspDeInit 1 */
