@@ -2,4 +2,6 @@
   (version 7)
   (lib (name "SW_uP_Reset")(type "KiCad")(uri "${KIPRJMOD}/components/SW_uP_Reset/SW_uP_Reset.pretty")(options "")(descr ""))
   (lib (name "SW_up_Boot")(type "KiCad")(uri "${KIPRJMOD}/components/SW_up_Boot/SW_up_Boot.pretty")(options "")(descr ""))
+  (lib (name "MDBT42T-AT")(type "KiCad")(uri "${KIPRJMOD}/components/MDBT42T-AT/MDBT42T-AT.pretty")(options "")(descr ""))
+  (lib (name "RGB_LED")(type "KiCad")(uri "${KIPRJMOD}/components/RGB_LED/RGB_LED.pretty")(options "")(descr ""))
 )
