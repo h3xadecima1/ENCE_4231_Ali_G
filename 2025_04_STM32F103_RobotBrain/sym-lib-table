@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "SW_up_Boot")(type "KiCad")(uri "${KIPRJMOD}/components/SW_up_Boot/SW_up_Boot.kicad_sym")(options "")(descr ""))
+)
