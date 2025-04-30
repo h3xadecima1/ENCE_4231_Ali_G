@@ -1,4 +1,4 @@
-24739096550003832
+24742587851509992
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -65848,6 +65848,13 @@ Yellow 5381 Series LED
 0
 2
 2
+MDBT42T-AT
+MDBT42T
+<b>Raytac Corporation</b><p>Part Number: MDBT42T-192K / MDBT42T-P192K<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; MDBT42T-AT / MDBT42T-PAT<br>Bluetooth Low Energy Module based on Noridc nRF52805<br>Size: 11.2x7.2mm<p>Source:<ul> <li>Raytac datasheet</li></ul>
+
+0
+19
+19
 Module
 A20_OLINUXINO_LIME2
 A20 Olinuxino LIME2, 1.2GHz, 512-1024MB RAM, Micro-SD, NAND or eMMC, 1000Mbit Ethernet
@@ -88906,6 +88913,13 @@ WiFi IEEE802.11 b/g/n
 0
 44
 44
+RGB_LED
+INPI55TATPRPGPB
+IN-PI55TATPRPGPB-3
+LED (Multiple)
+0
+4
+4
 Relay_SMD
 Relay_2P2T_10x6mm_TE_IMxxG
 Signal Relay, 10x6mm, 2 Form C, Gull Wings, https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Data+Sheet%7F108-98001%7FZ.1%7Fpdf%7FEnglish%7FENG_DS_108-98001_Z.1.pdf
