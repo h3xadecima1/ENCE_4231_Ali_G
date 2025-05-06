@@ -8,7 +8,7 @@
 		(title "Robot Brain PCB Board")
 		(date "2025-04-30")
 		(rev "1.0")
-		(company "Goncalo Martins")
+		(company "Ali Alalwia")
 	)
 	(lib_symbols
 		(symbol "Connector:USB_B_Mini"

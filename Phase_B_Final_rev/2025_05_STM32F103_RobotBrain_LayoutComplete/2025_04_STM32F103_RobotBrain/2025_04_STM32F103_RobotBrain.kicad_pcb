@@ -37,6 +37,8 @@
 		(pad_to_mask_clearance 0)
 		(allow_soldermask_bridges_in_footprints no)
 		(tenting front back)
+		(aux_axis_origin 92.1 109.750001)
+		(grid_origin 92.1 109.750001)
 		(pcbplotparams
 			(layerselection 0x00000000_00000000_55555555_5755f5ff)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
@@ -73,9 +75,9 @@
 			(subtractmaskfromsilk no)
 			(outputformat 1)
 			(mirror no)
-			(drillshape 1)
+			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "gerber/")
 		)
 	)
 	(net 0 "")
@@ -17706,6 +17708,19 @@
 			)
 		)
 	)
+	(gr_text "Embedded Systems\nName : Ali Alalwia\nVersion : 1.0\nDate : 05/06/2025"
+		(at 95.6 37.750001 0)
+		(layer "F.SilkS")
+		(uuid "e2f74f87-ac15-4890-8606-d76c094e0f6b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+	)
 	(gr_text "RGB 2"
 		(at 180.4 101.94 90)
 		(layer "F.SilkS")
@@ -18092,6 +18107,14 @@
 		(uuid "0719fa84-bae7-4378-9883-2f84b003b0a4")
 	)
 	(segment
+		(start 98.72 46.27)
+		(end 94 50.99)
+		(width 0.381)
+		(layer "F.Cu")
+		(net 28)
+		(uuid "0a163b39-5e81-448c-8678-250b404bbd85")
+	)
+	(segment
 		(start 122.58 99.9)
 		(end 122.58 80.3275)
 		(width 0.381)
@@ -18124,12 +18147,12 @@
 		(uuid "1ad7e1ac-9749-408d-a081-4c6750992ad8")
 	)
 	(segment
-		(start 135.5775 60.34)
-		(end 135.5775 59.4575)
-		(width 0.254)
+		(start 94 75.25)
+		(end 97.51 78.76)
+		(width 0.381)
 		(layer "F.Cu")
 		(net 28)
-		(uuid "1bc576b7-e1cc-495b-b4ae-abce78c92c82")
+		(uuid "218c0449-3ef0-4abb-ae51-22ccfb760f56")
 	)
 	(segment
 		(start 148.4925 69.835)
@@ -18186,6 +18209,14 @@
 		(layer "F.Cu")
 		(net 28)
 		(uuid "43e5dd51-71b1-4074-a2d5-d3d8bc4ae3ce")
+	)
+	(segment
+		(start 94 50.99)
+		(end 94 75.25)
+		(width 0.381)
+		(layer "F.Cu")
+		(net 28)
+		(uuid "485c10e6-b8c9-46d6-99a9-2d0e8ecda12f")
 	)
 	(segment
 		(start 142.99 70.305)
@@ -18442,14 +18473,6 @@
 		(layer "F.Cu")
 		(net 28)
 		(uuid "d76df91d-fb0f-441e-a7a8-c30060033b66")
-	)
-	(segment
-		(start 135.5775 59.4575)
-		(end 116.16 40.04)
-		(width 0.254)
-		(layer "F.Cu")
-		(net 28)
-		(uuid "d82a6e81-8e09-4919-aaf4-bbd9f653cab5")
 	)
 	(segment
 		(start 146.415 63.335)
