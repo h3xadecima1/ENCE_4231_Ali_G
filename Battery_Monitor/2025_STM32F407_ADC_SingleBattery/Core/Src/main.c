@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,14 +48,11 @@ DMA_HandleTypeDef hdma_adc1;
 
 I2C_HandleTypeDef hi2c1;
 
-I2S_HandleTypeDef hi2s3;
-
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
 
 UART_HandleTypeDef huart2;
-
 
 /* USER CODE BEGIN PV */
 
@@ -65,15 +63,19 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_I2S3_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
 void MX_USB_HOST_Process(void);
 
-/* USER CODE BEGIN PFP */
 
+/* USER CODE BEGIN PFP */
+// Function prototypes
+void handleButtonClick(void);
+void stopMotors(void);
+void rotateMotorCCW(void);
+void rotateMotorCW(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -84,7 +86,13 @@ int __io_putchar(int ch) {
 }
 
 volatile uint32_t adc_value = 0;
+volatile uint8_t button_clicks = 0;
+volatile uint32_t last_button_press_time = 0;
+volatile uint8_t motor_direction = 0;
 
+int __io_putchar(int ch); // function prototype
+float getBatteryVoltage(void); // function prototype
+void updateMotorControl(float battery_voltage); // function prototype
 /* USER CODE END 0 */
 
 /**
@@ -118,16 +126,17 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_I2C1_Init();
-  MX_I2S3_Init();
   MX_SPI1_Init();
   MX_USB_HOST_Init();
   MX_TIM1_Init();
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  printf("Battery monitor started (ADC1 CH1 / PA1)...\r\n");
-   HAL_ADC_Start(&hadc1);
    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_value, 1);
+   printf("Battery monitor started (ADC1 CH1 / PA1)...\r\n");
+
+   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_value, 1);
+   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
 
   /* USER CODE END 2 */
 
@@ -135,12 +144,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  MX_USB_HOST_Process();
-	      HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&adc_value, 1);
-	      float voltage = (3.3f * adc_value) / 4095.0f;
-	  	  float battery_voltage = voltage * 2.0f;  // Based on your resistor divider
-	  	  printf("Battery Voltage (DMA): %.2f V (Raw: %lu)\r\n", battery_voltage, adc_value);
-	  	  HAL_Delay(1000);
+	  MX_USB_HOST_Process();  // Keep if you're using USB
+
+	  float vbat = getBatteryVoltage();
+	  updateMotorControl(vbat);
+	  printf("Battery Voltage: %.2f V | ADC: %lu | Mode: %d\r\n", vbat, adc_value, motor_direction);
+	  HAL_GPIO_TogglePin(GPIOD, LD3_Pin); // blink LED
+	  HAL_Delay(1000);
 	    /* USER CODE END 3 */
 
     /* USER CODE END WHILE */
@@ -283,40 +293,6 @@ static void MX_I2C1_Init(void)
 }
 
 /**
-  * @brief I2S3 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_I2S3_Init(void)
-{
-
-  /* USER CODE BEGIN I2S3_Init 0 */
-
-  /* USER CODE END I2S3_Init 0 */
-
-  /* USER CODE BEGIN I2S3_Init 1 */
-
-  /* USER CODE END I2S3_Init 1 */
-  hi2s3.Instance = SPI3;
-  hi2s3.Init.Mode = I2S_MODE_MASTER_TX;
-  hi2s3.Init.Standard = I2S_STANDARD_PHILIPS;
-  hi2s3.Init.DataFormat = I2S_DATAFORMAT_16B;
-  hi2s3.Init.MCLKOutput = I2S_MCLKOUTPUT_ENABLE;
-  hi2s3.Init.AudioFreq = I2S_AUDIOFREQ_96K;
-  hi2s3.Init.CPOL = I2S_CPOL_LOW;
-  hi2s3.Init.ClockSource = I2S_CLOCK_PLL;
-  hi2s3.Init.FullDuplexMode = I2S_FULLDUPLEXMODE_DISABLE;
-  if (HAL_I2S_Init(&hi2s3) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN I2S3_Init 2 */
-
-  /* USER CODE END I2S3_Init 2 */
-
-}
-
-/**
   * @brief SPI1 Initialization Function
   * @param None
   * @retval None
@@ -374,13 +350,13 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 0;
+  htim1.Init.Prescaler = 83;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 65535;
+  htim1.Init.Period = 100;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_OC_Init(&htim1) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -390,14 +366,14 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_TIMING;
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 0;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -520,11 +496,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
   HAL_GPIO_Init(PDM_OUT_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : B1_Pin */
-  GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
+  /*Configure GPIO pin : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BOOT1_Pin */
   GPIO_InitStruct.Pin = BOOT1_Pin;
@@ -549,6 +525,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : I2S3_MCK_Pin I2S3_SCK_Pin I2S3_SD_Pin */
+  GPIO_InitStruct.Pin = I2S3_MCK_Pin|I2S3_SCK_Pin|I2S3_SD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   /*Configure GPIO pin : OTG_FS_OverCurrent_Pin */
   GPIO_InitStruct.Pin = OTG_FS_OverCurrent_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -561,12 +545,99 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(MEMS_INT2_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == GPIO_PIN_0)  // PA0
+    {
+        handleButtonClick();
+    }
+}
+float getBatteryVoltage(void) {
+  float voltage = (3.3f * adc_value) / 4095.0f;
+  return voltage * 2.0f;
+}
+
+void updateMotorControl(float battery_voltage) {
+  if (battery_voltage < 6.5f) {
+    motor_direction = 0;
+  } else if (battery_voltage > 7.0f && motor_direction == 0) {
+    motor_direction = 1;
+  }
+
+  uint32_t pwm_duty = 0;
+
+  if (battery_voltage >= 6.5f && battery_voltage <= 7.0f) {
+    pwm_duty = (adc_value * 100) / 4095;
+  }
+
+  if (motor_direction == 0) pwm_duty = 0;
+
+  __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_duty);
+}
+
+void handleButtonClick(void)
+{
+    static uint32_t last_click_time = 0;
+    static uint8_t click_count = 0;
+
+    uint32_t current_time = HAL_GetTick();
+
+    if ((current_time - last_click_time) > 400) {
+        click_count = 0;
+    }
+
+    click_count++;
+    last_click_time = current_time;
+
+    HAL_Delay(50); // optional debounce
+    HAL_Delay(450); // wait for possible additional clicks
+
+    switch (click_count) {
+        case 1:
+            stopMotors();
+            printf("Button: 1 click → Motor STOP\r\n");
+            break;
+        case 2:
+            rotateMotorCCW();
+            printf("Button: 2 clicks → Motor CCW\r\n");
+            break;
+        case 3:
+            rotateMotorCW();
+            printf("Button: 3 clicks → Motor CW\r\n");
+            break;
+        default:
+            printf("Button: %d clicks (ignored)\r\n", click_count);
+            break;
+    }
+}
+
+
+void stopMotors() {
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);  // PWM = 0
+}
+
+void rotateMotorCCW() {
+    uint32_t pwm_value = __HAL_TIM_GET_AUTORELOAD(&htim1) / 2;
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_value);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);  // Example: CCW direction
+}
+
+void rotateMotorCW() {
+    uint32_t pwm_value = __HAL_TIM_GET_AUTORELOAD(&htim1) / 2;
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pwm_value);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);  // Example: CW direction
+}
 
 /* USER CODE END 4 */
 

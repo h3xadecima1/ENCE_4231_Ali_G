@@ -102,8 +102,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**ADC1 GPIO Configuration
     PA1     ------> ADC1_IN1
+    PA4     ------> ADC1_IN4
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_4;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -156,8 +157,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 
     /**ADC1 GPIO Configuration
     PA1     ------> ADC1_IN1
+    PA4     ------> ADC1_IN4
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_1|GPIO_PIN_4);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(hadc->DMA_Handle);
@@ -240,98 +242,6 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
 }
 
 /**
-  * @brief I2S MSP Initialization
-  * This function configures the hardware resources used in this example
-  * @param hi2s: I2S handle pointer
-  * @retval None
-  */
-void HAL_I2S_MspInit(I2S_HandleTypeDef* hi2s)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-  if(hi2s->Instance==SPI3)
-  {
-    /* USER CODE BEGIN SPI3_MspInit 0 */
-
-    /* USER CODE END SPI3_MspInit 0 */
-
-  /** Initializes the peripherals clock
-  */
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S;
-    PeriphClkInitStruct.PLLI2S.PLLI2SN = 192;
-    PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
-    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    /* Peripheral clock enable */
-    __HAL_RCC_SPI3_CLK_ENABLE();
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    /**I2S3 GPIO Configuration
-    PA4     ------> I2S3_WS
-    PC7     ------> I2S3_MCK
-    PC10     ------> I2S3_CK
-    PC12     ------> I2S3_SD
-    */
-    GPIO_InitStruct.Pin = I2S3_WS_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
-    HAL_GPIO_Init(I2S3_WS_GPIO_Port, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = I2S3_MCK_Pin|I2S3_SCK_Pin|I2S3_SD_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-    /* USER CODE BEGIN SPI3_MspInit 1 */
-
-    /* USER CODE END SPI3_MspInit 1 */
-
-  }
-
-}
-
-/**
-  * @brief I2S MSP De-Initialization
-  * This function freeze the hardware resources used in this example
-  * @param hi2s: I2S handle pointer
-  * @retval None
-  */
-void HAL_I2S_MspDeInit(I2S_HandleTypeDef* hi2s)
-{
-  if(hi2s->Instance==SPI3)
-  {
-    /* USER CODE BEGIN SPI3_MspDeInit 0 */
-
-    /* USER CODE END SPI3_MspDeInit 0 */
-    /* Peripheral clock disable */
-    __HAL_RCC_SPI3_CLK_DISABLE();
-
-    /**I2S3 GPIO Configuration
-    PA4     ------> I2S3_WS
-    PC7     ------> I2S3_MCK
-    PC10     ------> I2S3_CK
-    PC12     ------> I2S3_SD
-    */
-    HAL_GPIO_DeInit(I2S3_WS_GPIO_Port, I2S3_WS_Pin);
-
-    HAL_GPIO_DeInit(GPIOC, I2S3_MCK_Pin|I2S3_SCK_Pin|I2S3_SD_Pin);
-
-    /* USER CODE BEGIN SPI3_MspDeInit 1 */
-
-    /* USER CODE END SPI3_MspDeInit 1 */
-  }
-
-}
-
-/**
   * @brief SPI MSP Initialization
   * This function configures the hardware resources used in this example
   * @param hspi: SPI handle pointer
@@ -400,14 +310,14 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* hspi)
 }
 
 /**
-  * @brief TIM_OC MSP Initialization
+  * @brief TIM_PWM MSP Initialization
   * This function configures the hardware resources used in this example
-  * @param htim_oc: TIM_OC handle pointer
+  * @param htim_pwm: TIM_PWM handle pointer
   * @retval None
   */
-void HAL_TIM_OC_MspInit(TIM_HandleTypeDef* htim_oc)
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
 {
-  if(htim_oc->Instance==TIM1)
+  if(htim_pwm->Instance==TIM1)
   {
     /* USER CODE BEGIN TIM1_MspInit 0 */
 
@@ -431,16 +341,16 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
     /* USER CODE END TIM1_MspPostInit 0 */
 
-    __HAL_RCC_GPIOE_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
     /**TIM1 GPIO Configuration
-    PE9     ------> TIM1_CH1
+    PA8     ------> TIM1_CH1
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_9;
+    GPIO_InitStruct.Pin = GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
-    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /* USER CODE BEGIN TIM1_MspPostInit 1 */
 
@@ -449,14 +359,14 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 
 }
 /**
-  * @brief TIM_OC MSP De-Initialization
+  * @brief TIM_PWM MSP De-Initialization
   * This function freeze the hardware resources used in this example
-  * @param htim_oc: TIM_OC handle pointer
+  * @param htim_pwm: TIM_PWM handle pointer
   * @retval None
   */
-void HAL_TIM_OC_MspDeInit(TIM_HandleTypeDef* htim_oc)
+void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 {
-  if(htim_oc->Instance==TIM1)
+  if(htim_pwm->Instance==TIM1)
   {
     /* USER CODE BEGIN TIM1_MspDeInit 0 */
 
